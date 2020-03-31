@@ -70,7 +70,7 @@ class my_neural_network:
         self.cost = []
         self.cost_value = None
         self.CV_cost = []
-        self.regularization = True
+        self.regularization = 0.7
         
         #Network parameters
         self.network_weights, self.gradient_weights,self.momentum_weights, self.rms_weights = [],[],[],[]
@@ -192,7 +192,7 @@ class my_neural_network:
         '''
         
         #Random seed Generator
-        np.random.seed(1)
+        np.random.seed(0)
 
         for i in range(1,self.num_of_layers):
 
@@ -262,9 +262,11 @@ class my_neural_network:
         if self.activation_function_name == "sigmoid":
             #print("Activating SIGMOID")
             return self.sigmoid(Z)
+
         elif self.activation_function_name == "relu":
             #print("Activating RELU")
             return self.relu(Z)
+
         elif self.activation_function_name == "tanh":
             #print("Activating Tanh")
             return self.tanh(Z)
@@ -324,7 +326,7 @@ class my_neural_network:
             self.Z.append(Z)
             self.activations.append(activated_Z)
 
-    def cost_function(self,Y, error_method = 'MSE', regularization = True,check_w =None):
+    def cost_function(self,Y, error_method = 'MSE', regularization=0.7,check_w =None):
         ''' 
         Description:
 
@@ -358,7 +360,7 @@ class my_neural_network:
         self.error_method = error_method
         self.regularization = regularization 
 
-        lambd = 0.7 #Higher Lambda ensure to control the Overfitting
+        #lambd = 0.7 #Higher Lambda ensure to control the Overfitting
 
         m = Y.shape[0]
         #if test:
@@ -366,13 +368,13 @@ class my_neural_network:
         #else:
         #    y_o = Y
         L2_regularization_cost = 0.0
-        if regularization and check_w == None:
+        if check_w == None:
             for lr in self.network_weights:
-                L2_regularization_cost += (lambd/(2*m))*np.sum(np.square(lr))
+                L2_regularization_cost += (self.regularization/(2*m))*np.sum(np.square(lr))
         
-        elif regularization and check_w != None:
+        else:#elif check_w != None:
             for lr in check_w:
-                L2_regularization_cost += (lambd/(2*m))*np.sum(np.square(lr))
+                L2_regularization_cost += (self.regularization/(2*m))*np.sum(np.square(lr))
 
         if self.error_method == "MSE":
             
@@ -410,7 +412,7 @@ class my_neural_network:
         ...........................................................................
         """    
         if self.error_method == 'MSE':
-            delC_delA = self.activations[-1] - y_o
+            delC_delA = (self.activations[-1] - y_o)#*(1/y_o.shape[0])
 
         elif self.error_method == "Cross Entropy":
             delC_delA = -np.divide(y_o,self.activations[-1])+np.divide((1-y_o),(1-self.activations[-1]))
@@ -447,10 +449,10 @@ class my_neural_network:
 
         
         '''
-        if self.regularization:
-            lambd = 0.7
-        else:
-            lambd = 0.0
+        #if self.regularization:
+        #    lambd = 0.7
+        #else:
+        #    lambd = 0.0
 
         #This is useful during gradient checking
         if check_w == None and check_b == None:
@@ -471,7 +473,7 @@ class my_neural_network:
         #delC_delW =  delC_delA * delA_delZ * delZ_delW
         delC_delW = np.dot(delC_delZ,self.activations[-2].transpose())#*(1.0/X.shape[1])
 
-        self.gradient_weights[-1] = delC_delW + (lambd/X.shape[1])*weights[-1]#*self.network_weights[-1]
+        self.gradient_weights[-1] = delC_delW + (self.regularization/X.shape[1])*weights[-1]#*self.network_weights[-1]
         assert ( self.gradient_weights[-1].shape == self.network_weights[-1].shape)
         self.gradient_bias[-1] = delC_delB#.reshape(self.network_bias[-1].shape)
         assert ( self.gradient_bias[-1].shape == self.network_bias[-1].shape)
@@ -483,7 +485,7 @@ class my_neural_network:
             delC_delB = np.sum(delC_delZ, axis=1, keepdims=True)#*(1.0/X.shape[1]) # Changed mean to SUM
             delC_delW = np.dot(delC_delZ,self.activations[i-2].transpose())#*(1.0/X.shape[1])#*
 
-            self.gradient_weights[i-2] = delC_delW + (lambd/X.shape[1])*weights[i-2]#self.network_weights[i-2]
+            self.gradient_weights[i-2] = delC_delW + (self.regularization/X.shape[1])*weights[i-2]#self.network_weights[i-2]
             assert ( self.gradient_weights[i-2].shape == self.network_weights[i-2].shape)
             self.gradient_bias[i-2] = delC_delB.reshape(self.network_bias[i-2].shape)
             assert ( self.gradient_bias[i-2].shape == self.network_bias[i-2].shape)
@@ -509,7 +511,7 @@ class my_neural_network:
             
         return w,b
 
-    def gradient_checking(self,X,Y,error_method='MSE'):
+    def gradient_checking(self,X,Y,error_method='MSE',regularization=0.7):
         """Implementation of gradient checking"""
         
         eps = 1e-7
@@ -568,7 +570,7 @@ class my_neural_network:
         denominator = np.linalg.norm(approx_graident)+np.linalg.norm(conglomerate_gradient_array)
         
         difference = numerator/denominator
-        #print('\n Gradient Checking difference : ', difference)
+        print('\n Gradient Checking difference : ', difference)
         if difference > 1e-4:
             raise ValueError("The Gradient Difference is abnormal. Kindly Check the Backpropagation!!")
 
@@ -749,7 +751,7 @@ class my_neural_network:
         plt.show()
 
 
-    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, activation_function = "sigmoid", batching=False, batch_size = None,  error_method = 'MSE', optimizer='GD'):
+    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.7,activation_function = "sigmoid", batching=False, batch_size = None,  error_method = 'MSE', optimizer='GD'):
         
         ''' Deep neural network model'''
         
@@ -757,7 +759,7 @@ class my_neural_network:
         self.activation_function_name = activation_function
         self.optimizer = optimizer
         self.epochs_number = epochs
-
+        self.regularization = regularization
         #number_of_samples = self.training_data[0].shape[1]
         
         #Initialize the Weights and Biases
@@ -863,5 +865,5 @@ model = my_neural_network(hidden_layer_dims)
 file_name = 'log.txt'
 model.load_dataset(file_name)
 model.test_train_split()
-model.NN_model(5001, 0.001,beta1=0.9,beta2=0.999,activation_function = "tanh", batching = False, batch_size= 128,optimizer = 'RMSProp')
+model.NN_model(1001, 0.01,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'RMSProp')
 #

@@ -127,7 +127,7 @@ class Testing_my_Neural_Net(unittest.TestCase):
         print("Forward Prop is Successful")
         
         print("Testing COST function without regularization")
-        cost1 = self.model2.cost_function(Y,error_method='MSE',regularization=False)
+        cost1 = self.model2.cost_function(Y,error_method='MSE',regularization=0.0)
         #self.assertAlmostEqual(cost1 ,1.865904)#0.155492)
         self.assertTrue(np.isclose(cost1,1.8659044))
         print("Cost Computation is Successful")
