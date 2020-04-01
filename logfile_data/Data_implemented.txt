@@ -1,0 +1,124 @@
+#1.
+hidden_layer_dims = [20,10,5]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.1
+b1 = 0.9
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+print("The activation function is :", activate)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#2.
+hidden_layer_dims = [20,10,5]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.01#0.1
+b1 = 0.9
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+print("The activation function is :", activate)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#3.
+hidden_layer_dims = [20,10,5]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.001#0.1
+b1 = 0.9
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+print("The activation function is :", activate)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#4.
+hidden_layer_dims = [20,10,5]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.001#0.1
+b1 = 0.8
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+print("The activation function is :", activate)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#5.
+hidden_layer_dims = [20,10,5]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.01#0.1
+b1 = 0.8
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+optim = 'adam'
+print("The activation function is :", activate)
+print("The Optimizer function is :", optim)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#6.
+hidden_layer_dims = [10,10,10]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.01#0.1
+b1 = 0.9
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+optim = 'adam'
+print("The activation function is :", activate)
+print("The Optimizer function is :", optim)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#
+
+#7.
+hidden_layer_dims = [10,10,10]
+print('The Hidden Layer Dimensions : ',hidden_layer_dims)
+model = my_neural_network(hidden_layer_dims)
+file_name = 'output_bigoni_martin_ellipse.txt'
+print("The file name is : ", file_name)
+model.load_dataset(file_name)
+model.test_train_split()
+lr = 0.01#0.1
+b1 = 0.8
+b2 = 0.999
+print("The learning rate is {}, beta1 = {}, beta2 = {}:".format(lr,b1,b2))
+activate = 'sigmoid'
+optim = 'adam'
+print("The activation function is :", activate)
+print("The Optimizer function is :", optim)
+model.NN_model(10001, lr,beta1=b1,beta2=b2,activation_function = activate, batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
+#

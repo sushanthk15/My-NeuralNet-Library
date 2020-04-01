@@ -37,6 +37,7 @@ class my_neural_network:
         '''Objects to store the input and the coutput data. An attribute is additionally set to store the calculated output from the neural network'''
         self.input_data = None
         self.output_data = None
+        self.output_data_noise = None
         self.predicted_output =None
         
         #train and test data
@@ -85,7 +86,7 @@ class my_neural_network:
         return 'Hello there!! I am your new AI trainer......!'
     
     
-    def load_dataset(self, file):
+    def load_dataset(self, file, noise=False):
         ''' 
         Description:
         To load dataset 
@@ -105,7 +106,16 @@ class my_neural_network:
         self.dataset = np.loadtxt(file)
         self.input_data = self.dataset[:,:-1]
         self.output_data = self.dataset[:,-1]
-        
+        self.output_data_noise = np.copy(self.output_data)
+        #Adding noise to output_data
+        if noise:
+            np.random.seed(1)
+            num_points = self.input_data.shape[0]
+            noise = np.random.normal(loc=0, scale=1.0, size=num_points)
+            self.output_data_noise += noise
+         
+
+
         #Normalization
         '''
         Normalization helps to modulate the data such that the values lies along 0 and 1.
@@ -120,6 +130,11 @@ class my_neural_network:
         min_outputs = np.amin(self.output_data, axis=0)
         diff_outputs = max_outputs - min_outputs
         self.output_data = np.divide((self.output_data - min_outputs), diff_outputs)
+
+        max_outputs_noise = np.amax(self.output_data_noise, axis=0)
+        min_outputs_noise = np.amin(self.output_data_noise, axis=0)
+        diff_outputs_noise = max_outputs_noise - min_outputs_noise
+        self.output_data_noise = np.divide((self.output_data_noise - min_outputs_noise), diff_outputs_noise)
         
         #Layer planning
         self.layer_dimensions = [self.input_data.shape[1]]+self.hidden_layer_plan+[1] #1 corresponds to columns in O/P
@@ -157,6 +172,7 @@ class my_neural_network:
 
             X_inp_train = self.input_data[mask]
             Y_out_train = self.output_data[mask]
+            Y_out_train_noise = self.output_data_noise[mask]
 
             mask1 = np.zeros((n_train),dtype=bool)
             mask1[:n_val_train] = True
@@ -165,22 +181,27 @@ class my_neural_network:
 
             X_train = X_inp_train[mask1]
             Y_train = Y_out_train[mask1]
+            Y_train_noise = Y_out_train_noise[mask1]
 
             X_val = X_inp_train[~mask1]
             Y_val = Y_out_train[~mask1]
+            Y_val_noise = Y_out_train_noise[~mask1]
 
             X_test = self.input_data[~mask]
             Y_test = self.output_data[~mask]
+            Y_test_noise = self.output_data_noise[~mask]
         else:
             X_train = self.input_data[:n_train,:]
             Y_train = self.output_data[:n_train]
+            Y_train_noise = self.output_data_noise[:n_train]
 
             X_test = self.input_data[n_train:,:]
             Y_test = self.output_data[n_train:]
+            Y_test_noise = self.output_data_noise[n_train :]
 
-        self.training_data = (X_train.transpose(), Y_train.transpose())
-        self.validation_data = (X_val.transpose(), Y_val.transpose())
-        self.testing_data = (X_test.transpose(), Y_test.transpose())
+        self.training_data = (X_train.transpose(), Y_train_noise.transpose(),Y_train.transpose())
+        self.validation_data = (X_val.transpose(), Y_val_noise.transpose(),Y_val.transpose())
+        self.testing_data = (X_test.transpose(), Y_test_noise.transpose(), Y_test.transpose())
         self.num_of_examples = self.training_data[0].shape[1]
         
     def network_parameters_initialization(self):
@@ -264,7 +285,7 @@ class my_neural_network:
                 self.mini_batches.append((mini_train_input,mini_train_output))
         else:
             
-            self.mini_batches = [self.training_data]
+            self.mini_batches = [self.training_data[:2]]
 
     def activation_function(self,Z):
         '''
@@ -578,7 +599,7 @@ class my_neural_network:
             #pint('the grad difference is ', approx_graident[i,0] - conglomerate_gradient_array[i,0])
         assert(approx_graident.shape == conglomerate_gradient_array.shape)    
         
-        numerator= np.linalg.norm(approx_graident) -np.linalg.norm(conglomerate_gradient_array)
+        numerator= np.linalg.norm(approx_graident-conglomerate_gradient_array)
         denominator = np.linalg.norm(approx_graident)+np.linalg.norm(conglomerate_gradient_array)
         
         difference = numerator/denominator
@@ -726,7 +747,7 @@ class my_neural_network:
             plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
             plt.suptitle('TestPlot_Layer Plan: {}, Acti func: {}, Optimizer: {}, learning: {}, beta1: {}'.format( str(self.layer_dimensions), self.activation_function_name, self.optimizer,self.hyperparameters[0], self.hyperparameters[1]))
 
-            Y= self.testing_data[1]
+            Y= self.testing_data[2] #Without noise
             ax[0,0].plot(Y, 'r--', label='Truth')
             ax[0,0].plot(self.activations[-1].reshape(Y.shape), 'o' ,label='Predicted')
             ax[0,0].set_title('Output convergence during Testing')#, fontsize=15)
@@ -734,8 +755,9 @@ class my_neural_network:
             ax[0,0].set_ylabel('Output Value i.e, Yield')
             ax[0,0].legend()
 
+            Y_n = self.testing_data[1]
             ax[0,1].plot(Y,Y, 'r--', label='Regression Line')
-            ax[0,1].scatter(Y, self.activations[-1].reshape(Y.shape), label='Predicted Values')
+            ax[0,1].scatter(Y_n, self.activations[-1].reshape(Y.shape), label='Predicted Values')
             ax[0,1].set_title("Truth v/s Predicted")
             ax[0,1].set_xlabel("Actual Output")
             ax[0,1].set_ylabel("Predicted Output")
@@ -768,7 +790,7 @@ class my_neural_network:
         ax[0,0].set_ylabel('Log(Cost Value)')
         ax[0,0].legend()
 
-        Y= self.training_data[1]
+        Y= self.training_data[2]
         ax[0,1].plot(Y, 'r--', label='Truth')
         ax[0,1].plot(self.activations[-1].reshape(Y.shape), 'o' ,label='Predicted')
         ax[0,1].set_title('Output convergence')#, fontsize=15)
@@ -776,8 +798,9 @@ class my_neural_network:
         ax[0,1].set_ylabel('Output Value i.e, Yield')
         ax[0,1].legend()
 
+        Y_n = self.training_data[1]
         ax[1,0].plot(Y,Y, 'r--', label='Regression Line')
-        ax[1,0].scatter(Y, self.activations[-1].reshape(Y.shape), label='Predicted Values')
+        ax[1,0].scatter(Y_n, self.activations[-1].reshape(Y.shape), label='Predicted Values')
         ax[1,0].set_title("Truth v/s Predicted")
         ax[1,0].set_xlabel("Actual Output")
         ax[1,0].set_ylabel("Predicted Output")
@@ -794,7 +817,7 @@ class my_neural_network:
         ax[1,1].legend()
         
         #plt.tight_layout()
-        fig.savefig("images_folder/Image_{}_{}_{}_{}.png".format(self.epochs_number, str(self.layer_dimensions), self.activation_function_name, self.optimizer))
+        fig.savefig("tested_images/Image_{}_{}_{}_{}.png".format(self.epochs_number, str(self.layer_dimensions), self.activation_function_name, self.optimizer))
         plt.show()
 
 
@@ -884,15 +907,15 @@ class my_neural_network:
                     #count = count+1
                     #if count>1 :
                     print("The Training is paused at the Iteration: "+str(iteration)+'as it no more learning beyond the tol '+str(tolerance))
-                    print(self.cost[-20:])
-                    print("\n The Current Cost is :",self.cost[-1]/self.num_of_examples)
+                    #print(self.cost[-20:])
+                    print("\n The Current Training Cost is :",self.cost[-1]/self.num_of_examples)
                     break
                 elif ((np.array(self.CV_cost[-10:])- np.array(self.CV_cost[-11:-1])) > np.zeros((10))).all():
                     count = count+1
                     if count>5 :
                         print("The Training is paused at the Iteration: "+str(iteration))#+'as it no more learning beyond the tol '+str(tolerance))
                         #print(self.CV_cost[-20:])
-                        print("\n The Current Cost is :",self.CV_cost[-1]/self.validation_data[0].shape[1])
+                        print("\n The Current Training Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
                         break
 
             ### 
@@ -917,10 +940,10 @@ class my_neural_network:
 # In[3]:
 
 
-hidden_layer_dims = [5,5]
-model = my_neural_network(hidden_layer_dims)
-file_name = 'log.txt'
-model.load_dataset(file_name)
-model.test_train_split()
-model.NN_model(201, 0.01,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'Momentum',early_stop=False)
+#hidden_layer_dims = [20,10,5]
+#model = my_neural_network(hidden_layer_dims)
+#file_name = 'output_bigoni_martin_ellipse.txt'
+#model.load_dataset(file_name)#, noise=True)
+#model.test_train_split()
+#model.NN_model(10001, 0.1,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
 #

@@ -1,0 +1,14 @@
+The Hidden Layer Dimensions :  [20, 10, 5]
+The file name is :  output_bigoni_martin_ellipse.txt
+The learning rate is 0.01, beta1 = 0.8, beta2 = 0.999:
+The activation function is : sigmoid
+The Optimizer function is : adam
+
+ Gradient Checking difference :  1.114136525558113e-08
+Cost after epoch 0: 29.329521
+The Training is paused at the Iteration: 335
+
+ The Current Training Cost is : 0.00848683619716974
+The R^2 score of Training is : 0.9439916392248587
+The cost in Testing is:  0.004043001217116587
+The R^2 score of Testing is : 0.9399571720617051
