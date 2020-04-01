@@ -43,7 +43,7 @@ class my_neural_network:
         '''Objects to store the Training data and Testing data. This is doen during the training and test data split'''
         self.training_data = None
         self.testing_data = None
-        
+        self.validation_data = None
         #layer details
         '''The attributes defining the deep network that is the number of hidden layers and its respective neurons '''
         self.hidden_layer_plan = hidden_layer_plan
@@ -145,18 +145,29 @@ class my_neural_network:
         2. Testing Dataset : tuple containing testing input and testing output
         .........................................................................
         '''
-        
+        np.random.seed(1)
         n_total = int(self.dataset.shape[0])
         n_train = int(split*n_total)
-        
+        n_val_train = int(1.1*split*n_train)
         if masking:
             mask = np.zeros((n_total), dtype=bool)
             mask[:n_train] = True
 
             np.random.shuffle(mask)
 
-            X_train = self.input_data[mask]
-            Y_train = self.output_data[mask]
+            X_inp_train = self.input_data[mask]
+            Y_out_train = self.output_data[mask]
+
+            mask1 = np.zeros((n_train),dtype=bool)
+            mask1[:n_val_train] = True
+
+            np.random.shuffle(mask1)
+
+            X_train = X_inp_train[mask1]
+            Y_train = Y_out_train[mask1]
+
+            X_val = X_inp_train[~mask1]
+            Y_val = Y_out_train[~mask1]
 
             X_test = self.input_data[~mask]
             Y_test = self.output_data[~mask]
@@ -168,6 +179,7 @@ class my_neural_network:
             Y_test = self.output_data[n_train:]
 
         self.training_data = (X_train.transpose(), Y_train.transpose())
+        self.validation_data = (X_val.transpose(), Y_val.transpose())
         self.testing_data = (X_test.transpose(), Y_test.transpose())
         self.num_of_examples = self.training_data[0].shape[1]
         
@@ -566,7 +578,7 @@ class my_neural_network:
             #pint('the grad difference is ', approx_graident[i,0] - conglomerate_gradient_array[i,0])
         assert(approx_graident.shape == conglomerate_gradient_array.shape)    
         
-        numerator= np.linalg.norm(approx_graident - conglomerate_gradient_array)
+        numerator= np.linalg.norm(approx_graident) -np.linalg.norm(conglomerate_gradient_array)
         denominator = np.linalg.norm(approx_graident)+np.linalg.norm(conglomerate_gradient_array)
         
         difference = numerator/denominator
@@ -693,21 +705,56 @@ class my_neural_network:
             Y = self.training_data[1]
             string = "Training"
         #assert(np.size(self.activations[-1]) == np.size(Y))
-        
-        error_percent = np.absolute(np.mean(np.divide(np.mean(self.activations[-1] - Y),np.mean(Y))))
-        print('The Accuracy of {} is :'.format(string), (1-error_percent)*100)
+        u = ((Y- self.activations[-1])**2).sum()
+        v = ((Y-Y.mean())**2).sum()
+        error_percent = u/v#np.absolute(np.mean(np.divide(np.mean(self.activations[-1] - Y),np.mean(Y))))
+        print('The R^2 score of {} is :'.format(string), (1-error_percent))
 
-    def evaluate(self):
+    def evaluate(self, plot=True):
         
         prediction_test = self.testing_data[0]
 
         self.forward_propagation(prediction_test)
         
         cost_test = self.cost_function(self.testing_data[1], self.error_method)
-        print('The cost in Testing is: ', cost_test)
+        print('The cost in Testing is: ', cost_test/(self.testing_data[0].shape[1]))
         
         self.accuracy(testing=True)
 
+        if plot:
+            fig,ax = plt.subplots(nrows = 2, ncols= 2, figsize=(20,8))
+            plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
+            plt.suptitle('TestPlot_Layer Plan: {}, Acti func: {}, Optimizer: {}, learning: {}, beta1: {}'.format( str(self.layer_dimensions), self.activation_function_name, self.optimizer,self.hyperparameters[0], self.hyperparameters[1]))
+
+            Y= self.testing_data[1]
+            ax[0,0].plot(Y, 'r--', label='Truth')
+            ax[0,0].plot(self.activations[-1].reshape(Y.shape), 'o' ,label='Predicted')
+            ax[0,0].set_title('Output convergence during Testing')#, fontsize=15)
+            ax[0,0].set_xlabel('Data Points')
+            ax[0,0].set_ylabel('Output Value i.e, Yield')
+            ax[0,0].legend()
+
+            ax[0,1].plot(Y,Y, 'r--', label='Regression Line')
+            ax[0,1].scatter(Y, self.activations[-1].reshape(Y.shape), label='Predicted Values')
+            ax[0,1].set_title("Truth v/s Predicted")
+            ax[0,1].set_xlabel("Actual Output")
+            ax[0,1].set_ylabel("Predicted Output")
+            ax[0,1].legend()
+
+            final_weights, final_bias =[],[]
+            for i,j in zip(self.network_weights, self.network_bias):
+                final_weights.append(i.flatten())
+                final_bias.append(j.flatten())
+            X_bar_w = np.linspace(1,len(np.concatenate(final_weights).ravel()),len(np.concatenate(final_weights).ravel()))
+            X_bar_b = np.linspace(1,len(np.concatenate(final_bias).ravel()),len(np.concatenate(final_bias).ravel()))
+            ax[1,0].bar(X_bar_w, np.concatenate(final_weights).ravel(), label='Weights')
+            ax[1,1].bar(X_bar_b, np.concatenate(final_bias).ravel(), label='Bias')
+            ax[1,0].set_title("Weights")
+            ax[1,0].legend()
+            ax[1,1].set_title("Biases")
+            ax[1,1].legend()
+
+            plt.show()
     
     def plotting(self):
         fig, ax = plt.subplots(nrows = 2 , ncols=2, figsize=(30,10))
@@ -723,7 +770,7 @@ class my_neural_network:
 
         Y= self.training_data[1]
         ax[0,1].plot(Y, 'r--', label='Truth')
-        ax[0,1].plot(self.activations[-1].reshape(Y.shape), label='Predicted')
+        ax[0,1].plot(self.activations[-1].reshape(Y.shape), 'o' ,label='Predicted')
         ax[0,1].set_title('Output convergence')#, fontsize=15)
         ax[0,1].set_xlabel('Data Points')
         ax[0,1].set_ylabel('Output Value i.e, Yield')
@@ -751,7 +798,7 @@ class my_neural_network:
         plt.show()
 
 
-    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.7,activation_function = "sigmoid", batching=False, batch_size = None,  error_method = 'MSE', optimizer='GD'):
+    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.7,activation_function = "sigmoid", batching=False, batch_size = None,  error_method = 'MSE', optimizer='GD', tolerance=1e-4, early_stop = False):
         
         ''' Deep neural network model'''
         
@@ -789,7 +836,7 @@ class my_neural_network:
                 self.back_propagation(mini_batch_X,mini_batch_Y)
 
                 #Gradient Checking
-                if iteration%100 == 0:
+                if iteration%1000 == 0:
                     #print("iteration%1000 : ", iteration, iteration%1000)
                     self.gradient_checking(mini_batch_X, mini_batch_Y,error_method)
 
@@ -822,23 +869,33 @@ class my_neural_network:
             self.cost.append(Average_cost)
 
             #Cross Validation:
-            cross_validation_input = self.testing_data[0]
+            cross_validation_input = self.validation_data[0]
             self.forward_propagation(cross_validation_input)
             #
             ##Cross Validation Cost computation
-            CV_cost1 = self.cost_function(self.testing_data[1], self.error_method)#, test=False)
+            CV_cost1 = self.cost_function(self.validation_data[1], self.error_method)#, test=False)
             self.CV_cost.append(CV_cost1)
 
             #Early Stopping
             #
-            #if iteration>2:
-            #    if abs(self.cost[-2] - self.cost[-1]) < 1e-4:
-            #        count = count+1
-            #        if count>5 :
-            #            print("The Training is paused at the Iteration: ", iteration)
-            #            print("\n The Current Cost is :",self.cost[-1])
-            #            break
-            #### 
+            if early_stop and iteration>20:
+                #tol=tolerance
+                if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
+                    #count = count+1
+                    #if count>1 :
+                    print("The Training is paused at the Iteration: "+str(iteration)+'as it no more learning beyond the tol '+str(tolerance))
+                    print(self.cost[-20:])
+                    print("\n The Current Cost is :",self.cost[-1]/self.num_of_examples)
+                    break
+                elif ((np.array(self.CV_cost[-10:])- np.array(self.CV_cost[-11:-1])) > np.zeros((10))).all():
+                    count = count+1
+                    if count>5 :
+                        print("The Training is paused at the Iteration: "+str(iteration))#+'as it no more learning beyond the tol '+str(tolerance))
+                        #print(self.CV_cost[-20:])
+                        print("\n The Current Cost is :",self.CV_cost[-1]/self.validation_data[0].shape[1])
+                        break
+
+            ### 
             self.epochs_number = iteration
 
         #prediction
@@ -851,7 +908,7 @@ class my_neural_network:
         self.plotting()
         
         #Evaluation
-        self.evaluate()
+        self.evaluate(plot=True)
 
         #self.accuracy()
         #self.plotting()
@@ -860,10 +917,10 @@ class my_neural_network:
 # In[3]:
 
 
-hidden_layer_dims = [10,10]
+hidden_layer_dims = [5,5]
 model = my_neural_network(hidden_layer_dims)
 file_name = 'log.txt'
 model.load_dataset(file_name)
 model.test_train_split()
-model.NN_model(1001, 0.01,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'RMSProp')
+model.NN_model(201, 0.01,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'Momentum',early_stop=False)
 #
