@@ -44,8 +44,13 @@ class Testing_my_Neural_Net(unittest.TestCase):
     def test_test_train_split(self):
         print('Test case for Test Train Split')
         self.model1.test_train_split()
-        self.assertEqual(self.model1.training_data[0].shape , (2,700))
-        self.assertEqual(self.model1.training_data[1].shape , (700,))
+
+        self.assertEqual(self.model1.training_data[0].shape , (2,539))
+        self.assertEqual(self.model1.training_data[1].shape , (539,))
+
+        self.assertEqual(self.model1.validation_data[0].shape , (2,161))
+        self.assertEqual(self.model1.validation_data[1].shape , (161,))
+
         self.assertEqual(self.model1.testing_data[0].shape , (2,300))
         self.assertEqual(self.model1.testing_data[1].shape , (300,))
 
@@ -54,13 +59,13 @@ class Testing_my_Neural_Net(unittest.TestCase):
         self.model1.test_train_split()
         
         self.model1.batching(batching=True, batch_size=100)
-        self.assertEqual(len(self.model1.mini_batches),7)
+        self.assertEqual(len(self.model1.mini_batches),6)
 
         self.model1.batching(batching=False, batch_size=100)
         self.assertEqual(len(self.model1.mini_batches),1)
 
         self.model1.batching(batching=True, batch_size=1)
-        self.assertEqual(len(self.model1.mini_batches),701)
+        self.assertEqual(len(self.model1.mini_batches),540)
 
     def test_sigmoid(self):
         print("Testing Sigmoid function")
@@ -127,7 +132,7 @@ class Testing_my_Neural_Net(unittest.TestCase):
         print("Forward Prop is Successful")
         
         print("Testing COST function without regularization")
-        cost1 = self.model2.cost_function(Y,error_method='MSE',regularization=False)
+        cost1 = self.model2.cost_function(Y,error_method='MSE',regularization=0.0)
         #self.assertAlmostEqual(cost1 ,1.865904)#0.155492)
         self.assertTrue(np.isclose(cost1,1.8659044))
         print("Cost Computation is Successful")
