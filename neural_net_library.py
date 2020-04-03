@@ -908,7 +908,9 @@ class my_neural_network:
         self.network_parameters_initialization()
         count = 0
         time_step = 0
-		#initial_learning_rate = learning_rate*1
+
+        initial_learning_rate = learning_rate
+		
 		
         for iteration in range(epochs):#, desc='Training Epochs'):
             
@@ -991,12 +993,14 @@ class my_neural_network:
                         #print(self.CV_cost[-20:])
                         print("\n The Current Training Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
                         break
+
+            elif iteration>20 and iteration%100:
+
+                if (abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
+                    ''' Learning rate decay'''
+                    learning_rate = initial_learning_rate/iteration**learning_rate_decay
 						
-			#elif iteration>20 and iteration%100 == 0:
-				#if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
-					#''' Learning Rate decay'''
-					#pass
-					#learning_rate = initial_learning_rate/iteration**learning_rate_decay
+		    
 					
 					
 				
