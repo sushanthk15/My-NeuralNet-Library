@@ -603,7 +603,7 @@ class my_neural_network:
         denominator = np.linalg.norm(approx_graident)+np.linalg.norm(conglomerate_gradient_array)
         
         difference = numerator/denominator
-        print('\n Gradient Checking difference : ', difference)
+        #print('\n Gradient Checking difference : ', difference)
         if difference > 1e-4:
             raise ValueError("The Gradient Difference is abnormal. Kindly Check the Backpropagation!!")
 
@@ -616,7 +616,7 @@ class my_neural_network:
             * Input arguments: *
 
             1. Network weights and Network biases : list containing layer based weights and biases
-            2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propogation
+            2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propagation
             3. learning_rate 
             
 
@@ -644,7 +644,7 @@ class my_neural_network:
         * Input arguments: *
 
         1. Network weights and Network biases : list containing layer based weights and biases
-        2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propogation
+        2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propagation
         3. learning_rate 
         4. beta1 : Exponential Decay Hyper-parameter utilized in estimation of first moments
 
@@ -675,7 +675,7 @@ class my_neural_network:
         * Input arguments: *
 
         1. Network weights and Network biases : list containing layer based weights and biases
-        2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propogation
+        2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propagation
         3. learning_rate 
         4. beta2 : Exponential Decay Hyper-parameter utilized in estimation of second moments
 
@@ -697,7 +697,26 @@ class my_neural_network:
             self.network_bias[p-1] -= (learning_rate*self.gradient_bias[p-1])/(np.sqrt(self.rms_bias[p-1])+epsilon)
         
     def update_parameters_Adam(self,learning_rate,beta1, beta2, t):
-        '''Implementation of Adaptive Moment Estimation(Adam) optimization'''
+        '''
+		Description:
+		Implementation of Adaptive Moment Estimation(Adam) optimization
+			- Combination of Momentum and RMS Prop
+		
+		.................................................................................
+		* Input arguments : *
+		1. Network weights and Network biases : list containing layer based weights and biases
+        2. Gradient weights and gradient biases : list containing layer based gradients computed from Back Propagation 
+		3. learning_rate 
+        4. beta1 : Exponential Decay Hyper-parameter utilized in estimation of first moments
+		5. beta2 : Exponential Decay Hyper-parameter utilized in estimation of second moments
+		6. t : time counter or epoch count needed for adaptive mechanism
+		
+		* Returns : *
+
+        Updated network weights and biases : List containing layer based updated Weights and Biases
+			
+		...............................................................................
+		'''
         epsilon=1e-8
         temp_momentum_weights, temp_momentum_bias, temp_rms_weights, temp_rms_bias = [],[],[],[]
         
@@ -732,7 +751,29 @@ class my_neural_network:
         print('The R^2 score of {} is :'.format(string), (1-error_percent))
 
     def evaluate(self, plot=True):
-        
+		#'''
+		#Description:
+		#This function is used to predict the results for unseen data or the testing data.
+		#	- After the training is completed, the network parameters are stored and used for prediction
+		#	- Forward Propagation is applied for the testing input
+		#	- The predicted output is compared to the actual output
+		#
+		#....................................................................
+		#* Input Arguments :
+		#1. If plot=True , plot results can be viewed by the user
+		#
+		#*Results : *
+		#- The final activation is the predicted output
+		#- accuracy is calculated
+		#- R^2 score is calculated
+		#- Plots :
+		#	a. The predicted curve and final curve are imbibed to see the fit
+		#	b. cross -validated predictions is visualized, ideally needs to y=x that is R^2 =1
+		#	c. The measures of Weights and Biases 
+		#..................................................................................
+		#
+		#'''
+		        
         prediction_test = self.testing_data[0]
 
         self.forward_propagation(prediction_test)
@@ -821,21 +862,54 @@ class my_neural_network:
         plt.show()
 
 
-    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.7,activation_function = "sigmoid", batching=False, batch_size = None,  error_method = 'MSE', optimizer='GD', tolerance=1e-4, early_stop = False):
+    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.01,activation_function = "sigmoid", batching=False, batch_size = 64,  error_method = 'MSE', optimizer='GD', tolerance=1e-4, early_stop = False, learning_rate_decay=0.5):
         
-        ''' Deep neural network model'''
+        ''' 
+		
+		Deep neural network model:
+		
+		The heart of the neural network lies here. This is the parent function which trigers all the necesary functions such as initialization, forward propagation, cost computation , back propagation, etc.....
+		
+		........................................................................................................
+		* Input Arguments : *
+		1. epochs :  Maximum Number of iterations required to train the network | int
+		2. learning_rate : steps required to jump towards the minima | float | positive [0,1)
+		3. beta1 : Exponential Decay Hyper-parameter utilized in estimation of first moments | used for Momentum and Adam only |float|+ve [0,1) |Default = 0.9
+		4. beta2 : Exponential Decay Hyper-parameter utilized in estimation of second moments | used for RMSProp and Adam only | float |+ve [0,1) 			 |Default:0.999
+		5. regularization parameter: Hyperparameter used for avoiding overfitting | float |+ve [0,1) |Default : 0.01
+		6. activation functions: string - sigmoid , relu, tanh| default: sigmoid
+		7. batching: used for mini-batching | type: bool  | Default: False
+		8. batch_size : type int | Default=64
+		9. error_method : type: string - MSE or 'Cross Entropy' | Default: MSE
+		10. optimizer : type: string - GD , Momentum, RMSProp, Adam
+		11. tolerance : float Default: 1e-4
+		12. early_stop : for early stopping, type: bool Default: False
+		13. learning_rate_decay : float | Default = 0.5
+		
+		* Returns/Results :*
+		
+		1. Predicted Output : Array | After the training process, the predicted outputs can be retreived by activations[-1]
+		2. Cost : List | The cost of training can be accessed by cost
+		3. CV_cost : List | cost incurred for the validation dataset
+		
+		................................................................................................	
+		
+		'''
         
         
         self.activation_function_name = activation_function
         self.optimizer = optimizer
         self.epochs_number = epochs
         self.regularization = regularization
+		
         #number_of_samples = self.training_data[0].shape[1]
         
         #Initialize the Weights and Biases
         self.network_parameters_initialization()
         count = 0
         time_step = 0
+		#initial_learning_rate = learning_rate*1
+		
         for iteration in range(epochs):#, desc='Training Epochs'):
             
             #Batching
@@ -917,7 +991,15 @@ class my_neural_network:
                         #print(self.CV_cost[-20:])
                         print("\n The Current Training Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
                         break
-
+						
+			#elif iteration>20 and iteration%100 == 0:
+				#if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
+					#''' Learning Rate decay'''
+					#pass
+					#learning_rate = initial_learning_rate/iteration**learning_rate_decay
+					
+					
+				
             ### 
             self.epochs_number = iteration
 
@@ -928,10 +1010,10 @@ class my_neural_network:
 
         self.accuracy()
 
-        self.plotting()
+        #self.plotting()
         
         #Evaluation
-        self.evaluate(plot=True)
+        #self.evaluate(plot=True)
 
         #self.accuracy()
         #self.plotting()
