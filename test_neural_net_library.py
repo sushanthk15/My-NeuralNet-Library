@@ -16,7 +16,7 @@ class Testing_my_Neural_Net(unittest.TestCase):
         print('SetUp')
         self.model1 = my_neural_network([1])
         self.model2 = my_neural_network([])
-        self.model3 = my_neural_network([3,3,3])
+        self.model3 = my_neural_network([3,4,5])
 
         filename = 'log.txt'
         filename2 = 'XOR.txt'
@@ -28,6 +28,7 @@ class Testing_my_Neural_Net(unittest.TestCase):
     def tearDown(self):
         print("TearDown \n")
 
+    
     def test_load_dataset(self):
         print("Testing the Load Dataset function")
         self.assertEqual(self.model1.input_data.shape , (1000,2))
@@ -66,6 +67,29 @@ class Testing_my_Neural_Net(unittest.TestCase):
 
         self.model1.batching(batching=True, batch_size=1)
         self.assertEqual(len(self.model1.mini_batches),540)
+    
+    def test_network_parameters_initialization(self):
+        print("Testing the Initialization function")
+        np.random.seed(0)
+
+        self.model1.network_parameters_initialization()
+        self.model2.network_parameters_initialization()
+        self.model3.network_parameters_initialization()
+
+        W1 = self.model2.network_weights[0]
+        #print(W1.shape)
+        W1_check = np.array([[ 1.76405235,  0.40015721]])
+        #print(W1_check.shape)
+        
+        self.assertTrue(np.allclose(W1,W1_check))
+        #self.assertTrue(np.allclose(np.squeeze(B1),np.squeeze(B1_check)))
+
+        #W2 = self.model3.network_weights[-2]
+        #W2_check = np.random.randn(5,4)
+        #B2 = self.model3.network_weights[-3]
+        #B2_check = np.random.randn(4,1)
+        #self.assertTrue((W2==W2_check).all())
+        #self.assertTrue((B2==B2_check).all())
 
     def test_sigmoid(self):
         print("Testing Sigmoid function")
