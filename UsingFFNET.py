@@ -2,17 +2,31 @@ import numpy as np
 import matplotlib.pyplot as plt 
 from ffnet import ffnet, mlgraph, savenet, loadnet, exportnet
 
-#Defining the Network Plan
-conec = mlgraph((2,20,20,20,1))
-net = ffnet(conec)
+
 
 #Loading the Data
-data = np.loadtxt('output_bigoni_steel.txt')
-X = data[:,:2]
-y = data[:,2:]
+data = np.loadtxt('output_bigoni_martin_ellipse.txt')
+X = data[:,:-1]
+y = data[:,-1]
+
+
+#nORMALIZATION
+max_inputs = np.amax(X, axis=0)
+min_inputs = np.amin(X, axis=0)
+diff_inputs = max_inputs - min_inputs
+X = np.divide((X - min_inputs),diff_inputs)
+
+max_outputs = np.amax(y, axis=0)
+min_outputs = np.amin(y, axis=0)
+diff_outputs = max_outputs - min_outputs
+y = np.divide((y - min_outputs), diff_outputs)
 #noise = np.random.normal(loc=0, scale=1.0, size=len(y))
 #noise1 = noise.reshape(y.shape)
 #y_n = y #+ noise1
+
+#Defining the Network Plan
+conec = mlgraph((X.shape[1],10,10,1))
+net = ffnet(conec)
 
 #Test train data split
 n_tot=X.shape[0]
@@ -21,7 +35,7 @@ n_train = int(split*n_tot)
 
 mask = np.zeros((n_tot), dtype=bool)
 mask[:n_train] = True
-
+np.random.seed(0)
 np.random.shuffle(mask)
 
 X_train = X[mask]
@@ -40,21 +54,31 @@ output, regress = net.test(X_test, Y_test)
 savenet(net, "log.net")
 
 #Accuracy calculations
-accuracy_percent = abs(np.mean(np.divide((output - Y_test),Y_test)))
+#accuracy_percent = abs(np.mean(np.divide((output - Y_test),Y_test)))
+accuracy_percent = abs(np.mean(np.divide((output - Y_test).mean(),Y_test.mean())))
 print('Accuracy of testing: ',(1-accuracy_percent)*100)
 
 #Plotting 
-fig , ax = plt.subplots(ncols=3, figsize=(20,8))
+fig , ax = plt.subplots(ncols=2, figsize=(10,6))
 plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
 ax[0].plot(net.weights , label='Weights')
 ax[0].set_title('Network Weights')
+ax[0].legend()
+ax[1].plot(Y_test, 'r--', label='Yield Surface')
+ax[1].plot(output, label='Predicted')
+ax[1].legend()
+plt.show()
 
-ax[1].scatter(Y_test ,output[:,0], label='Predicted')
-ax[1].plot(Y_test ,Y_test, 'r--',label='Truth')
-ax[1].legend()
-ax[1].set_title('Output convergence during Testing')
-#ax[1].set_aspect(aspect='equal')
-ax[2].plot(Y_test, 'r--')
-ax[2].plot(output)
-ax[1].legend()
+#Plotting the actual v/s predicted output
+fig,ax=plt.subplots(figsize=(10,6))
+ax.scatter (Y_test, output, edgecolors=(0,1,0))
+ax.plot([0, 1], [0, 1], '--k', lw=4)
+plt.xlabel("Actual Output", fontsize=15)
+plt.ylabel("Predicted Output", fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.text(0.075,0.95, r'Cross validated predictions using FFNET',fontsize=15)
+plt.text(0.08,0.85, r'$R^2$=%.2f' % (regress[0][2]),fontsize=15)
+ax.set_xlim([0, 1])
+ax.set_ylim([0, 1])
 plt.show()
