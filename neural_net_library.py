@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
-#Date: 22.03.2020
+# Name : Sushanth Keshav | Matrikel Nr: 63944
+# Topic : Custom built Feed Forward Neural Network Library
+# Last Update: 04.04.2020
+#####################################################################################
 
 # In[1]:
-
 
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
-#from tqdm import tqdm
+from tqdm import tqdm
 
 # In[2]:
-
 
 class my_neural_network:
     
@@ -596,16 +597,16 @@ class my_neural_network:
             ###############################################################################################
             approx_graident[i,0] = (func_plus[i,0] - func_minus[i,0])/(2*eps)
             ###############################################################################################
-            #pint('the grad difference is ', approx_graident[i,0] - conglomerate_gradient_array[i,0])
+            
         assert(approx_graident.shape == conglomerate_gradient_array.shape)    
         
         numerator= np.linalg.norm(approx_graident-conglomerate_gradient_array)
         denominator = np.linalg.norm(approx_graident)+np.linalg.norm(conglomerate_gradient_array)
         
         difference = numerator/denominator
-        #print('\n Gradient Checking difference : ', difference)
+        
         if difference > 1e-4:
-            raise ValueError("The Gradient Difference is abnormal. Kindly Check the Backpropagation!!")
+            raise ValueError("Please verify your hyper-parameters!!")
 
     def update_parameters_GD(self,learning_rate):
             ''' 
@@ -737,56 +738,69 @@ class my_neural_network:
             self.network_weights[p-1] -= (learning_rate*temp_momentum_weights[p-1])/(np.sqrt(temp_rms_weights[p-1])+epsilon)
             self.network_bias[p-1] -= (learning_rate*temp_momentum_bias[p-1])/(np.sqrt(temp_rms_bias[p-1])+epsilon)
 
+    
     def accuracy(self, testing = False):
+        ''' 
+        Calculates the Accuracy Fit or R^2 Score
+        
+        ....................................................
+        * Input Arguments *
+        1. testing = True or false | Bool type | elps to calculate the R^2 for training and testing
+        
+        *Results :*
+        prints the R^2 score for the datasets.
+        ....................................................
+        
+        '''
         if testing:
             Y = self.testing_data[1]
             string = "Testing"
         else:
             Y = self.training_data[1]
             string = "Training"
-        #assert(np.size(self.activations[-1]) == np.size(Y))
+        
         u = ((Y- self.activations[-1])**2).sum()
         v = ((Y-Y.mean())**2).sum()
         error_percent = u/v#np.absolute(np.mean(np.divide(np.mean(self.activations[-1] - Y),np.mean(Y))))
         print('The R^2 score of {} is :'.format(string), (1-error_percent))
 
     def evaluate(self, plot=True):
-		#'''
-		#Description:
-		#This function is used to predict the results for unseen data or the testing data.
-		#	- After the training is completed, the network parameters are stored and used for prediction
-		#	- Forward Propagation is applied for the testing input
-		#	- The predicted output is compared to the actual output
-		#
-		#....................................................................
-		#* Input Arguments :
-		#1. If plot=True , plot results can be viewed by the user
-		#
-		#*Results : *
-		#- The final activation is the predicted output
-		#- accuracy is calculated
-		#- R^2 score is calculated
-		#- Plots :
-		#	a. The predicted curve and final curve are imbibed to see the fit
-		#	b. cross -validated predictions is visualized, ideally needs to y=x that is R^2 =1
-		#	c. The measures of Weights and Biases 
-		#..................................................................................
-		#
-		#'''
+        '''
+        Description:
+        This function is used to predict the results for unseen data or the testing data.
+            - After the training is completed, the network parameters are stored and used for prediction
+            - Forward Propagation is applied for the testing input
+            - The predicted output is compared to the actual output
+
+        ....................................................................
+        * Input Arguments :
+        1. If plot=True , plot results can be viewed by the user
+
+        *Results : *
+        - The final activation is the predicted output
+        - accuracy is calculated
+        - R^2 score is calculated
+        - Plots :
+            a. The predicted curve and final curve are imbibed to see the fit
+            b. cross -validated predictions is visualized, ideally needs to y=x that is R^2 =1
+            c. The measures of Weights and Biases 
+        ..................................................................................
+
+        '''
 		        
         prediction_test = self.testing_data[0]
 
         self.forward_propagation(prediction_test)
         
         cost_test = self.cost_function(self.testing_data[1], self.error_method)
-        print('The cost in Testing is: ', cost_test/(self.testing_data[0].shape[1]))
+        print('The mean cost in Testing is: ', cost_test/(self.testing_data[0].shape[1]))
         
         self.accuracy(testing=True)
 
         if plot:
             fig,ax = plt.subplots(nrows = 2, ncols= 2, figsize=(20,8))
             plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
-            plt.suptitle('TestPlot_Layer Plan: {}, Acti func: {}, Optimizer: {}, learning: {}, beta1: {}'.format( str(self.layer_dimensions), self.activation_function_name, self.optimizer,self.hyperparameters[0], self.hyperparameters[1]))
+            plt.suptitle('TestPlot_Layer Plan: {}, Acti func: {}, Optimizer: {}'.format( str(self.layer_dimensions), self.activation_function_name, self.optimizer))
 
             Y= self.testing_data[2] #Without noise
             ax[0,0].plot(Y, 'r--', label='Truth')
@@ -797,7 +811,7 @@ class my_neural_network:
             ax[0,0].legend()
 
             Y_n = self.testing_data[1]
-            ax[0,1].plot(Y,Y, 'r--', label='Regression Line')
+            ax[0,1].plot(Y,Y, 'r--', label='Ideal Regression Line')
             ax[0,1].scatter(Y_n, self.activations[-1].reshape(Y.shape), label='Predicted Values')
             ax[0,1].set_title("Truth v/s Predicted")
             ax[0,1].set_xlabel("Actual Output")
@@ -822,7 +836,7 @@ class my_neural_network:
     def plotting(self):
         fig, ax = plt.subplots(nrows = 2 , ncols=2, figsize=(30,10))
         plt.subplots_adjust(left=0.125, bottom=0.1, right=0.9, top=0.9, wspace=0.5, hspace=0.5)
-        plt.suptitle('Epochs: {}, Layer Plan: {}, Acti func: {}, Optimizer: {}, learning: {}, beta1: {}'.format( self.epochs_number,str(self.layer_dimensions), self.activation_function_name, self.optimizer,self.hyperparameters[0], self.hyperparameters[1]))
+        plt.suptitle('Epochs: {}, Layer Plan: {}, Acti func: {}, Optimizer: {}'.format( self.epochs_number,str(self.layer_dimensions), self.activation_function_name, self.optimizer))
         
         ax[0,0].semilogy(np.array(self.cost), label = "Training Cost")
         ax[0,0].plot(np.array(self.CV_cost), "r--", label="Validation")
@@ -840,7 +854,7 @@ class my_neural_network:
         ax[0,1].legend()
 
         Y_n = self.training_data[1]
-        ax[1,0].plot(Y,Y, 'r--', label='Regression Line')
+        ax[1,0].plot(Y,Y, 'r--', label='Ideal Regression Line')
         ax[1,0].scatter(Y_n, self.activations[-1].reshape(Y.shape), label='Predicted Values')
         ax[1,0].set_title("Truth v/s Predicted")
         ax[1,0].set_xlabel("Actual Output")
@@ -862,7 +876,7 @@ class my_neural_network:
         plt.show()
 
 
-    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.01,activation_function = "sigmoid", batching=False, batch_size = 64,  error_method = 'MSE', optimizer='GD', tolerance=1e-4, early_stop = False, learning_rate_decay=0.5):
+    def NN_model(self, epochs, learning_rate, beta1=None, beta2=None, regularization = 0.01,activation_function = "sigmoid", batching=False, batch_size = 64,  error_method = 'MSE', optimizer='GD', tolerance=1e-4, early_stop = False, learning_rate_decay=0.5 ,print_cost = False, plot=False):
         
         ''' 
 		
@@ -885,6 +899,8 @@ class my_neural_network:
 		11. tolerance : float Default: 1e-4
 		12. early_stop : for early stopping, type: bool Default: False
 		13. learning_rate_decay : float | Default = 0.5
+        14. print_cost = bool | Default False
+        15. plot = bool | Default
 		
 		* Returns/Results :*
 		
@@ -912,7 +928,7 @@ class my_neural_network:
         initial_learning_rate = learning_rate
 		
 		
-        for iteration in range(epochs):#, desc='Training Epochs'):
+        for iteration in tqdm(range(epochs), desc='Training Epochs'):
             
             #Batching
             self.batching(batching, batch_size)
@@ -961,7 +977,7 @@ class my_neural_network:
 
             Average_cost = cost_measured/len(self.mini_batches)
 
-            if iteration%1000 == 0:
+            if print_cost and iteration%1000 == 0:
                 print ("Cost after epoch %i: %f" %(iteration, Average_cost))
 
             #if iteration%100 == 0:
@@ -970,33 +986,33 @@ class my_neural_network:
             #Cross Validation:
             cross_validation_input = self.validation_data[0]
             self.forward_propagation(cross_validation_input)
-            #
+            
             ##Cross Validation Cost computation
             CV_cost1 = self.cost_function(self.validation_data[1], self.error_method)#, test=False)
             self.CV_cost.append(CV_cost1)
 
             #Early Stopping
             #
-            if early_stop and iteration>20:
+            if iteration > 0 and iteration%100 == 0:#early_stop and iteration>20:
                 #tol=tolerance
-                if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
-                    #count = count+1
-                    #if count>1 :
-                    print("The Training is paused at the Iteration: "+str(iteration)+'as it no more learning beyond the tol '+str(tolerance))
-                    #print(self.cost[-20:])
-                    print("\n The Current Training Cost is :",self.cost[-1]/self.num_of_examples)
-                    break
-                elif ((np.array(self.CV_cost[-10:])- np.array(self.CV_cost[-11:-1])) > np.zeros((10))).all():
+                #if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
+                #    #count = count+1
+                #    #if count>1 :
+                #    print("The Training is paused at the Iteration: "+str(iteration)+'as it no more learning beyond the tol '+str(tolerance))
+                #    #print(self.cost[-20:])
+                #    print("\n The Current Training Cost is :",self.cost[-1]/self.num_of_examples)
+                #    break
+                if ((np.array(self.CV_cost[-10:])- np.array(self.CV_cost[-11:-1])) > np.zeros((10))).all():
                     count = count+1
                     if count>5 :
                         print("The Training is paused at the Iteration: "+str(iteration))#+'as it no more learning beyond the tol '+str(tolerance))
                         #print(self.CV_cost[-20:])
-                        print("\n The Current Training Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
+                        print("\n The Current Training Mean Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
                         break
 
-            elif iteration>20 and iteration%100:
+            #elif iteration>20 and iteration%100:
 
-                if (abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
+                elif (abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
                     ''' Learning rate decay'''
                     learning_rate = initial_learning_rate/iteration**learning_rate_decay
 						
@@ -1014,7 +1030,8 @@ class my_neural_network:
 
         self.accuracy()
 
-        #self.plotting()
+        if plot:
+            self.plotting()
         
         #Evaluation
         #self.evaluate(plot=True)
