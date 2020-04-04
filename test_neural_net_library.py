@@ -1,3 +1,10 @@
+#####################################################################
+# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Topic : Unit testing/Functional Testing of my_neural_network
+# Programming Language : Python
+# Last Updated : 04.04.2020
+#####################################################################
+
 import unittest
 import numpy as np
 from neural_net_library import my_neural_network
@@ -30,6 +37,8 @@ class Testing_my_Neural_Net(unittest.TestCase):
 
     
     def test_load_dataset(self):
+        ''' Testing the load Data Set Function '''
+
         print("Testing the Load Dataset function")
         self.assertEqual(self.model1.input_data.shape , (1000,2))
         self.assertEqual(self.model1.output_data.shape , (1000,))
@@ -72,34 +81,55 @@ class Testing_my_Neural_Net(unittest.TestCase):
         print("Testing the Initialization function")
         np.random.seed(0)
 
+        #Initialize Network parameters
         self.model1.network_parameters_initialization()
         self.model2.network_parameters_initialization()
         self.model3.network_parameters_initialization()
 
+        #Testing network parameters
         W1 = self.model2.network_weights[0]
-        #print(W1.shape)
-        W1_check = np.array([[ 1.76405235,  0.40015721]])
-        #print(W1_check.shape)
+        B1 = self.model2.network_bias[0]
         
+        W1_check = np.array([[ 1.76405235,  0.40015721]])
+        B1_check = np.array([[ 0.97873798]])
         self.assertTrue(np.allclose(W1,W1_check))
-        #self.assertTrue(np.allclose(np.squeeze(B1),np.squeeze(B1_check)))
+        self.assertTrue(np.allclose(np.squeeze(B1),np.squeeze(B1_check)))
 
-        #W2 = self.model3.network_weights[-2]
-        #W2_check = np.random.randn(5,4)
-        #B2 = self.model3.network_weights[-3]
-        #B2_check = np.random.randn(4,1)
-        #self.assertTrue((W2==W2_check).all())
-        #self.assertTrue((B2==B2_check).all())
+        #Testing initial gradient weights and biases
+        dW2 = self.model3.gradient_weights[-2]
+        dW2_check = np.zeros((5,4))
+        dB2 = self.model3.gradient_bias[-3]
+        dB2_check = np.zeros((4,1))
+        self.assertTrue((dW2==dW2_check).all())
+        self.assertTrue((dB2==dB2_check).all())
+
+        #Testing initial momentum weights and biases
+        dW2_mom = self.model1.momentum_weights[-1]
+        dW2_check_mom = np.zeros((1,1))
+        db2_mom = self.model1.momentum_bias[-1]
+        db2_check_mom = np.zeros((1,1))
+        self.assertTrue((dW2_mom==dW2_check_mom).all())
+        self.assertTrue((db2_mom==db2_check_mom).all())
+
+        #Testing initial rms weights and biases
+        dW3_rms = self.model1.rms_weights[-1]
+        dW3_check_rms = np.zeros((1,1))
+        db3_rms = self.model1.rms_bias[-1]
+        db3_check_rms = np.zeros((1,1))
+        self.assertTrue((dW3_rms==dW3_check_rms).all())
+        self.assertTrue((db3_rms==db3_check_rms).all())
+
 
     def test_sigmoid(self):
         print("Testing Sigmoid function")
+
         z1 = self.model1.sigmoid(np.array([0 , -np.inf , np.inf]))
         z2 = np.array([0.5, 0. , 1. ])
         self.assertTrue((z1==z2).all())
 
     def test_relu(self):
         print("Testing RELU function")
-        #print(np.maximum(0,np.array([-1.0,0.0,5.0])))
+        
         self.assertEqual(self.model1.relu(np.array([-21.])), np.array([0.]))
         self.assertEqual(self.model1.relu(np.array([0.])), np.array([0.]))
         self.assertEqual(self.model1.relu(np.array([5])), np.array([5.]))
@@ -107,12 +137,14 @@ class Testing_my_Neural_Net(unittest.TestCase):
         
     def test_tanh(self):
         print("Testing Tanh function")
+
         z1 = self.model1.tanh(np.array([0 , -np.inf , np.inf]))
         z2 = np.array([ 0., -1.,  1.])
         self.assertTrue((z1==z2).all())
 
     def test_sigmoid_derivative(self):
         print("Testing Sigmoid Derivative function")
+        
         z1 = self.model1.sigmoid_derivative(np.array([0 , -np.inf , np.inf]))
         z2 = np.array([0.25, 0. , 0. ])
         self.assertTrue((z1==z2).all())
@@ -132,35 +164,40 @@ class Testing_my_Neural_Net(unittest.TestCase):
         self.assertTrue((z1==z2).all())
 
     def test_forward_propagation(self):
+
         print("Testing Forward Prop and Cost Function")
 
         X = self.model2.input_data.transpose()
         Y = self.model2.output_data.transpose()
         self.model2.network_parameters_initialization()
-        #print("The X shape is :", X.shape)
-        #print("The num of layers is:", self.model2.num_of_layers)
-        wts = [np.array([1,2])]#, np.array([1.5])]
-        bias = [np.array([0.]).reshape(-1,1)]#, np.array([0.5])]
+        
+        wts = [np.array([1,2])]
+        bias = [np.array([0.]).reshape(-1,1)]
         self.model2.forward_propagation(X, wts, bias)
+
         z1 = self.model2.Z[0]
-        #z2 = self.model2.Z[1]
+        
         A0 = self.model2.activations[0]
         A1 = self.model2.activations[1]
-        #A2 = self.model2.activations[2]
+        
         z1_check = np.array([0,2,1,3,0,2,1,3,0,2,1,3]).reshape(1,12)
         self.assertTrue((z1==z1_check).all())
         A1_check = np.array([0.5 , 0.88079708, 0.73105858, 0.95257413, 0.5 , 0.88079708, 0.73105858, 0.95257413, 0.5 , 0.88079708, 0.73105858, 0.95257413])
         self.assertTrue((A0==X).all())
-        #print('A1-y: ' ,A1-A1_check)
+        
         self.assertTrue(np.allclose(A1, A1_check))
         print("Forward Prop is Successful")
         
-        print("Testing COST function without regularization")
+        #######################################################################
+
+        print("Testing COST function ")
         cost1 = self.model2.cost_function(Y,error_method='MSE',regularization=0.0)
-        #self.assertAlmostEqual(cost1 ,1.865904)#0.155492)
+        
         self.assertTrue(np.isclose(cost1,1.8659044))
         print("Cost Computation is Successful")
 
+        ###########################################################################
+        
         print("Testing COST_derivative function")
         self.model2.cost_function_derivative(Y)
         dcost_expected = self.model2.activations[1] - Y
@@ -168,6 +205,8 @@ class Testing_my_Neural_Net(unittest.TestCase):
         self.assertTrue((dcost_actual == dcost_expected).all())
         print("Derivative of Cost Computation is Successful")
 
+        #############################################################################
+        
         print("Testing Backward Propagation")
         self.model2.back_propagation(X,Y,wts, bias)
         delC_delW = self.model2.gradient_weights[-1]
@@ -176,13 +215,9 @@ class Testing_my_Neural_Net(unittest.TestCase):
         db = np.array([0.307924447])
         self.assertTrue(np.allclose(np.squeeze(delC_delB), np.squeeze(db)))
         print("Backward Prop is Successful")
-    #def test_cost_function_derivative(self):
-    #    print("Testing the Cost derivative dC/dA")
-    #    Y = self.model2.output_data.transpose()
-    #    self.model2.cost_function_derivative(Y)
-    #    dcost_expected = self.model2.activations[1] - Y
-    #    dcost_actual = self.model2.loss_derivative
-    #    self.assertTrue((dcost_actual == dcost_expected).all())
+
+        
+    
 
 if __name__ == '__main__':
     unittest.main()
