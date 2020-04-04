@@ -1,16 +1,31 @@
+####################################################################################
+#!/usr/bin/env python
+# coding: utf-8
+# Name : Sushanth Keshav | Matrikel Nr: 63944
+# Topic : Testing using FFNET python package and verifying custom built Feed Forward Neural Network Library
+# Last Update: 04.04.2020
+#####################################################################################
+
 import numpy as np
 import matplotlib.pyplot as plt 
+import time 
 from ffnet import ffnet, mlgraph, savenet, loadnet, exportnet
 
-
+#Input from the user
+file_name = 'output_bigoni_martin_ellipse.txt'
+optimizer = "Momentum"
+#Hyper-parameter for the Momentum
+beta1 = 0.9 # 0 for Gradient Descent else it is for Momentum
+#Start Timer
+start_time = time.clock()
 
 #Loading the Data
-data = np.loadtxt('output_bigoni_martin_ellipse.txt')
+data = np.loadtxt(file_name)#output_bigoni_martin_ellipse
 X = data[:,:-1]
 y = data[:,-1]
 
 
-#nORMALIZATION
+#NORMALIZATION
 max_inputs = np.amax(X, axis=0)
 min_inputs = np.amin(X, axis=0)
 diff_inputs = max_inputs - min_inputs
@@ -20,12 +35,9 @@ max_outputs = np.amax(y, axis=0)
 min_outputs = np.amin(y, axis=0)
 diff_outputs = max_outputs - min_outputs
 y = np.divide((y - min_outputs), diff_outputs)
-#noise = np.random.normal(loc=0, scale=1.0, size=len(y))
-#noise1 = noise.reshape(y.shape)
-#y_n = y #+ noise1
 
 #Defining the Network Plan
-conec = mlgraph((X.shape[1],10,10,1))
+conec = mlgraph((X.shape[1],5,5,1))
 net = ffnet(conec)
 
 #Test train data split
@@ -45,7 +57,10 @@ X_test = X[~mask]
 Y_test = y[~mask]
 
 #Training the network using momentum optimization
-net.train_momentum(X_train, Y_train, eta=0.01, momentum=0.9, maxiter=10000, disp=0)
+if optimizer == "Momentum" :
+    net.train_momentum(X_train, Y_train, eta=0.01, momentum=beta1, maxiter=10000, disp=0)
+elif optimizer == "BFGS":
+    net.train_bfgs(X_train, Y_train)
 
 #Evaluating the Data
 output, regress = net.test(X_test, Y_test)
@@ -54,9 +69,11 @@ output, regress = net.test(X_test, Y_test)
 savenet(net, "log.net")
 
 #Accuracy calculations
-#accuracy_percent = abs(np.mean(np.divide((output - Y_test),Y_test)))
 accuracy_percent = abs(np.mean(np.divide((output - Y_test).mean(),Y_test.mean())))
 print('Accuracy of testing: ',(1-accuracy_percent)*100)
+
+#Stop timer
+stop_time = time.clock()
 
 #Plotting 
 fig , ax = plt.subplots(ncols=2, figsize=(10,6))
@@ -78,7 +95,12 @@ plt.ylabel("Predicted Output", fontsize=15)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.text(0.075,0.95, r'Cross validated predictions using FFNET',fontsize=15)
-plt.text(0.08,0.85, r'$R^2$=%.2f' % (regress[0][2]),fontsize=15)
+plt.text(0.075,0.87, r'Optimizer: {}'.format(optimizer),fontsize=15)
+plt.text(0.08,0.80, r'$R^2$=%.2f' % (regress[0][2]),fontsize=15)
 ax.set_xlim([0, 1])
 ax.set_ylim([0, 1])
 plt.show()
+
+#Time Elapsed
+total_time = stop_time - start_time
+print("The total time taken for learning is : %.2f seconds" %(total_time))
