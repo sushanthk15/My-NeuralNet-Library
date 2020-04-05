@@ -75,6 +75,13 @@ hydrostatic_pressure = np.array(hydrostatic_pressure)
 lode_angle = np.array(lode_angle)
 yield_potential = np.array(yield_potential)
 
+#Save Data into a Txt fine
+save_data = np.zeros((1000,3))
+save_data[:,0] = hydrostatic_pressure
+save_data[:,1] = lode_angle
+save_data[:,2] = yield_potential
+np.savetxt('Bigoni_yield_data.txt',save_data)
+
 #3D plots of the yield surface
 fig1 = plt.figure(figsize=(10,6))
 ax1 = plt.axes(projection='3d')
