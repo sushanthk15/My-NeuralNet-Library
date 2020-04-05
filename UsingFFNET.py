@@ -12,7 +12,7 @@ import time
 from ffnet import ffnet, mlgraph, savenet, loadnet, exportnet
 
 #Input from the user
-file_name = 'output_bigoni_martin_ellipse.txt'
+file_name = 'Concrete_Data.txt'
 optimizer = "Momentum"
 #Hyper-parameter for the Momentum
 beta1 = 0.9 # 0 for Gradient Descent else it is for Momentum
@@ -104,3 +104,4 @@ plt.show()
 #Time Elapsed
 total_time = stop_time - start_time
 print("The total time taken for learning is : %.2f seconds" %(total_time))
+
