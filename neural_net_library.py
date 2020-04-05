@@ -991,7 +991,7 @@ class my_neural_network:
 
                 elif (abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
                     ''' Learning rate decay'''
-                    learning_rate = initial_learning_rate/iteration**learning_rate_decay
+                    learning_rate = initial_learning_rate/(1+iteration*learning_rate_decay)
 						
 		    
 					

@@ -19,7 +19,7 @@ file_name = 'output_bigoni_martin_ellipse.txt'
 print("The file name is : ", file_name)
 
 #Enter the hyper-parameters. Note that all the hyper-parameters are Non-Negative
-epochs = 100
+epochs = 10000
 lr = 0.01
 # Mandatory for Momentum and Adam range: [0,1)
 b1 = 0.9 
