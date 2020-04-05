@@ -16,6 +16,8 @@ file_name = 'Concrete_Data.txt'
 optimizer = "Momentum"
 #Hyper-parameter for the Momentum
 beta1 = 0.9 # 0 for Gradient Descent else it is for Momentum
+#Hidden layer plan
+hid_layer = [5,5]
 #Start Timer
 start_time = time.clock()
 
@@ -37,7 +39,7 @@ diff_outputs = max_outputs - min_outputs
 y = np.divide((y - min_outputs), diff_outputs)
 
 #Defining the Network Plan
-conec = mlgraph((X.shape[1],5,5,1))
+conec = mlgraph((8,5,5,1))
 net = ffnet(conec)
 
 #Test train data split

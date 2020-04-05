@@ -231,16 +231,16 @@ class my_neural_network:
         for i in range(1,self.num_of_layers):
 
             self.network_weights.append(np.random.randn(self.layer_dimensions[i], 
-                                                                         self.layer_dimensions[i-1]))#*np.sqrt(4/self.num_of_layers))
+                                                                         self.layer_dimensions[i-1]))#
             self.network_bias.append(np.random.randn(self.layer_dimensions[i],1))
             
             assert(self.network_weights[i-1].shape == (self.layer_dimensions[i], 
                                                                          self.layer_dimensions[i-1]))
             assert(self.network_bias[i-1].shape == (self.layer_dimensions[i],1))
             
-            self.gradient_weights.append(np.zeros_like(self.network_weights[i-1])) #np.zeros((self.layer_dimensions[i], self.layer_dimensions[i-1]))
+            self.gradient_weights.append(np.zeros_like(self.network_weights[i-1])) #
                                                                          #
-            self.gradient_bias.append(np.zeros_like(self.network_bias[i-1]))#np.zeros((self.layer_dimensions[i],1))
+            self.gradient_bias.append(np.zeros_like(self.network_bias[i-1]))#
             
             self.momentum_weights.append(np.zeros_like(self.network_weights[i-1]))
             
@@ -256,7 +256,7 @@ class my_neural_network:
 
         Size is always in powers of 2 (32,64,128,...)
         '''
-        #self.num_of_examples = self.training_data[0].shape[1]
+
               
         
         if batching:
@@ -265,13 +265,6 @@ class my_neural_network:
             training_input = self.training_data[0]
             training_output = self.training_data[1]
             
-            ##Shuffling the inputs
-            #np.random.seed(0)
-            #shuffle_series = np.arange(self.num_of_examples)
-            #np.random.shuffle(shuffle_series)
-#
-            #shuffled_training_input = 
-            #mini_batches = []
             
             number_of_batches = int(self.num_of_examples/batch_size)
             
@@ -354,9 +347,8 @@ class my_neural_network:
         for l in range(self.num_of_layers-1):
 
             Z = np.dot(weights[l], self.activations[l]) + bias[l]
-            #print(" The Z.shape: ", Z.shape)
+            
             activated_Z = self.activation_function(Z)
-            #print(" The Activated Z.shape: ", activated_Z.shape)
             self.Z.append(Z)
             self.activations.append(activated_Z)
 
@@ -394,19 +386,15 @@ class my_neural_network:
         self.error_method = error_method
         self.regularization = regularization 
 
-        #lambd = 0.7 #Higher Lambda ensure to control the Overfitting
-
+        
         m = Y.shape[0]
-        #if test:
-        #    y_o = self.testing_data[1]
-        #else:
-        #    y_o = Y
+
         L2_regularization_cost = 0.0
         if check_w == None:
             for lr in self.network_weights:
                 L2_regularization_cost += (self.regularization/(2*m))*np.sum(np.square(lr))
         
-        else:#elif check_w != None:
+        else:
             for lr in check_w:
                 L2_regularization_cost += (self.regularization/(2*m))*np.sum(np.square(lr))
 
@@ -414,9 +402,9 @@ class my_neural_network:
             
             diff = self.activations[-1] - Y
             
-            cost = 0.5*np.sum(np.square(diff))#*(1/m) #MSE Calculation
+            cost = 0.5*np.sum(np.square(diff))#
             
-            #self.cost_value = np.squeeze(cost) ------------ to be added at the end of the mini batching
+            
         elif self.error_method == "Cross Entropy":
 
             cost = np.sum((np.multiply(-Y,np.log(self.activations[-1]))-np.multiply((1-Y),np.log(1-self.activations[-1]))))
@@ -446,7 +434,7 @@ class my_neural_network:
         ...........................................................................
         """    
         if self.error_method == 'MSE':
-            delC_delA = (self.activations[-1] - y_o)#*(1/y_o.shape[0])
+            delC_delA = (self.activations[-1] - y_o)#
 
         elif self.error_method == "Cross Entropy":
             delC_delA = -np.divide(y_o,self.activations[-1])+np.divide((1-y_o),(1-self.activations[-1]))
@@ -483,11 +471,7 @@ class my_neural_network:
 
         
         '''
-        #if self.regularization:
-        #    lambd = 0.7
-        #else:
-        #    lambd = 0.0
-
+        
         #This is useful during gradient checking
         if check_w == None and check_b == None:
             weights = self.network_weights
@@ -496,30 +480,30 @@ class my_neural_network:
             weights = check_w
             bias = check_b
 
-        delC_delA = self.cost_derivative#*(1.0/X.shape[1])
+        delC_delA = self.cost_derivative#
 
         #For Last Layer
 
         #delC _delZ = delC_delA * delA_delZ
-        delC_delZ = np.multiply(delC_delA,self.activation_function_derivative(self.Z[-1]))###########*(1.0/X.shape[1])
+        delC_delZ = np.multiply(delC_delA,self.activation_function_derivative(self.Z[-1]))##
         #delC_delB =  delC_delA * delA_delZ * delZ_delB
-        delC_delB = np.sum(delC_delZ, axis=1,keepdims = True)#*(1.0/X.shape[1]) # Changed mean to SUM
+        delC_delB = np.sum(delC_delZ, axis=1,keepdims = True)#
         #delC_delW =  delC_delA * delA_delZ * delZ_delW
-        delC_delW = np.dot(delC_delZ,self.activations[-2].transpose())#*(1.0/X.shape[1])
+        delC_delW = np.dot(delC_delZ,self.activations[-2].transpose())#
 
-        self.gradient_weights[-1] = delC_delW + (self.regularization/X.shape[1])*weights[-1]#*self.network_weights[-1]
+        self.gradient_weights[-1] = delC_delW + (self.regularization/X.shape[1])*weights[-1]#
         assert ( self.gradient_weights[-1].shape == self.network_weights[-1].shape)
-        self.gradient_bias[-1] = delC_delB#.reshape(self.network_bias[-1].shape)
+        self.gradient_bias[-1] = delC_delB
         assert ( self.gradient_bias[-1].shape == self.network_bias[-1].shape)
 
         for i in reversed(range(2,self.num_of_layers)):
-            #delC_delA = np.dot(self.network_weights[i-1].transpose(),delC_delZ)#################*(1.0/X.shape[1])
+            
             delC_delA = np.dot(weights[i-1].transpose(),delC_delZ)
             delC_delZ = np.multiply(delC_delA , self.activation_function_derivative(self.Z[i-2]))
-            delC_delB = np.sum(delC_delZ, axis=1, keepdims=True)#*(1.0/X.shape[1]) # Changed mean to SUM
-            delC_delW = np.dot(delC_delZ,self.activations[i-2].transpose())#*(1.0/X.shape[1])#*
+            delC_delB = np.sum(delC_delZ, axis=1, keepdims=True)
+            delC_delW = np.dot(delC_delZ,self.activations[i-2].transpose())
 
-            self.gradient_weights[i-2] = delC_delW + (self.regularization/X.shape[1])*weights[i-2]#self.network_weights[i-2]
+            self.gradient_weights[i-2] = delC_delW + (self.regularization/X.shape[1])*weights[i-2]
             assert ( self.gradient_weights[i-2].shape == self.network_weights[i-2].shape)
             self.gradient_bias[i-2] = delC_delB.reshape(self.network_bias[i-2].shape)
             assert ( self.gradient_bias[i-2].shape == self.network_bias[i-2].shape)
@@ -900,7 +884,7 @@ class my_neural_network:
 		12. early_stop : for early stopping, type: bool Default: False
 		13. learning_rate_decay : float | Default = 0.5
         14. print_cost = bool | Default False
-        15. plot = bool | Default
+        15. plot = bool | Default : False
 		
 		* Returns/Results :*
 		
@@ -918,7 +902,7 @@ class my_neural_network:
         self.epochs_number = epochs
         self.regularization = regularization
 		
-        #number_of_samples = self.training_data[0].shape[1]
+        
         
         #Initialize the Weights and Biases
         self.network_parameters_initialization()
@@ -952,7 +936,7 @@ class my_neural_network:
 
                 #Gradient Checking
                 if iteration%1000 == 0:
-                    #print("iteration%1000 : ", iteration, iteration%1000)
+                    
                     self.gradient_checking(mini_batch_X, mini_batch_Y,error_method)
 
                 if self.optimizer == 'GD':
@@ -994,23 +978,16 @@ class my_neural_network:
             #Early Stopping
             #
             if iteration > 0 and iteration%100 == 0:#early_stop and iteration>20:
-                #tol=tolerance
-                #if(abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
-                #    #count = count+1
-                #    #if count>1 :
-                #    print("The Training is paused at the Iteration: "+str(iteration)+'as it no more learning beyond the tol '+str(tolerance))
-                #    #print(self.cost[-20:])
-                #    print("\n The Current Training Cost is :",self.cost[-1]/self.num_of_examples)
-                #    break
+
                 if ((np.array(self.CV_cost[-10:])- np.array(self.CV_cost[-11:-1])) > np.zeros((10))).all():
                     count = count+1
                     if count>5 :
-                        print("The Training is paused at the Iteration: "+str(iteration))#+'as it no more learning beyond the tol '+str(tolerance))
-                        #print(self.CV_cost[-20:])
+                        print("The Training is paused at the Iteration: "+str(iteration))
+                        
                         print("\n The Current Training Mean Cost is :",self.cost[-1]/self.validation_data[0].shape[1])
                         break
 
-            #elif iteration>20 and iteration%100:
+            
 
                 elif (abs(np.array(self.cost[-11:-1])- np.array(self.cost[-10:])) < tolerance*(np.ones((10)))).all():
                     ''' Learning rate decay'''
@@ -1033,11 +1010,6 @@ class my_neural_network:
         if plot:
             self.plotting()
         
-        #Evaluation
-        #self.evaluate(plot=True)
-
-        #self.accuracy()
-        #self.plotting()
 
 
 # In[3]:
