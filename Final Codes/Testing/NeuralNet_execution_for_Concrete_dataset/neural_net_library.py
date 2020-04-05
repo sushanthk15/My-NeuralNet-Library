@@ -856,7 +856,7 @@ class my_neural_network:
         ax[1,1].legend()
         
         #plt.tight_layout()
-        fig.savefig("tested_images/Image_{}_{}_{}_{}.png".format(self.epochs_number, str(self.layer_dimensions), self.activation_function_name, self.optimizer))
+        fig.savefig("Image_{}_{}_{}_{}.png".format(self.epochs_number, str(self.layer_dimensions), self.activation_function_name, self.optimizer))
         plt.show()
 
 
@@ -1012,13 +1012,3 @@ class my_neural_network:
         
 
 
-# In[3]:
-
-
-#hidden_layer_dims = [20,10,5]
-#model = my_neural_network(hidden_layer_dims)
-#file_name = 'output_bigoni_martin_ellipse.txt'
-#model.load_dataset(file_name)#, noise=True)
-#model.test_train_split()
-#model.NN_model(10001, 0.1,beta1=0.9,beta2=0.999,activation_function = "sigmoid", batching = False, batch_size= 128,optimizer = 'adam',early_stop=True)
-#
