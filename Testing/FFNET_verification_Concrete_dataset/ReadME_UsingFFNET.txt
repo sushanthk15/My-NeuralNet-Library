@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav 
 # Topic : Verification of neural net library results using FFNET package for calculating compressive strength of concrete
 # Programming Language : Python
 # Last Updated : 04.04.2020

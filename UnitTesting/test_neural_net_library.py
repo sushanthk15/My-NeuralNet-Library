@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav
 # Topic : Unit testing/Functional Testing of my_neural_network
 # Programming Language : Python
 # Last Updated : 04.04.2020

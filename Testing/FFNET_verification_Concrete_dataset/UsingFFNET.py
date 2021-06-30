@@ -1,7 +1,7 @@
 ####################################################################################
 #!/usr/bin/env python
 # coding: utf-8
-# Name : Sushanth Keshav | Matrikel Nr: 63944
+# Name : Sushanth Keshav
 # Topic : Testing using FFNET python package and verifying custom built Feed Forward Neural Network Library for Compresive strength of Concrete
 # Last Update: 04.04.2020
 #####################################################################################

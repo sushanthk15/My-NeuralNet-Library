@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav
 # Aim : Modelling the yield surfaces asper Bigoni Piccolroaz Model
 #         and training the model to the generated Bigoni Surface
 # Programming Language : Python

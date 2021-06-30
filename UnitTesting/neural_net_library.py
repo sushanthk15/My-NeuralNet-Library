@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-# Name : Sushanth Keshav | Matrikel Nr: 63944
+# Name : Sushanth Keshav 
 # Topic : Custom built Feed Forward Neural Network Library
 # Last Update: 04.04.2020
 #####################################################################################

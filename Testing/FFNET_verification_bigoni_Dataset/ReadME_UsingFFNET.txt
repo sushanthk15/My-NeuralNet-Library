@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav 
 # Aim : Verification of the Bigoni Data yield Surface results by using FFNET package
 # Programming Language : Python
 # Last Updated : 04.04.2020

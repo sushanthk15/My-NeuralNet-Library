@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav
 # Topic : Implementing the learning process through my_neural_network
 # Programming Language : Python
 # Last Updated : 04.04.2020

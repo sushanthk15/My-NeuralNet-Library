@@ -1,5 +1,5 @@
 #####################################################################
-# Name :  Sushanth Keshav | Matrikel Nr: 63944
+# Name :  Sushanth Keshav 
 # Aim : Implementing the Unit testing of the neural_net_library
 # Programming Language : Python
 # Last Updated : 04.04.2020
